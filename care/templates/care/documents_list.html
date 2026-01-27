@@ -1,0 +1,41 @@
+{% extends "care/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Documents – {{ su.full_name }}</h3>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{% url 'care:serviceuser_detail' su.pk %}">Back</a>
+    <a class="btn btn-primary" href="{% url 'care:document_upload' su.pk %}">Upload Document</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Description</th>
+          <th>Uploaded</th>
+          <th>By</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in docs %}
+        <tr>
+          <td>{{ d.get_category_display }}</td>
+          <td>{{ d.description|default:"—" }}</td>
+          <td>{{ d.uploaded_at }}</td>
+          <td>{{ d.uploaded_by.username }}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{{ d.file.url }}" target="_blank">Open</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No documents uploaded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

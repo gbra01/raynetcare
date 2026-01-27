@@ -1,0 +1,67 @@
+{% extends "care/base.html" %}
+{% load static %}
+{% block content %}
+<script src="{% static 'care/offline.js' %}"></script>
+
+
+
+<div class="alert alert-warning d-flex justify-content-between align-items-center">
+  <div>
+    <strong>Offline notes pending:</strong>
+    <span id="pending-count">0</span>
+    <span class="ms-2" id="online-status"></span>
+  </div>
+  <button class="btn btn-sm btn-dark" onclick="syncNotes()">Sync Now</button>
+  <button class="btn btn-sm btn-outline-secondary" id="toggle-offline"></button>
+</div>
+
+<script>
+  document.getElementById("pending-count").innerText = outboxCount();
+
+  function refreshStatus() {
+    const forced = isForcedOffline();
+    const online = navigator.onLine && !forced;
+    document.getElementById("online-status").innerText = online ? "Online" : "Offline";
+    document.getElementById("toggle-offline").innerText = forced ? "Disable Forced Offline" : "Force Offline Mode";
+  }
+
+  document.getElementById("toggle-offline").addEventListener("click", function() {
+    setForcedOffline(!isForcedOffline());
+    refreshStatus();
+    alert(isForcedOffline() ? "Forced Offline is ON (training mode)." : "Forced Offline is OFF.");
+  });
+
+  refreshStatus();
+</script>
+
+<h1>{{ su.full_name }}</h1>
+<p><strong>Address:</strong> {{ su.address|default:"—" }}</p>
+<p><strong>Key notes:</strong> {{ su.key_notes|default:"—" }}</p>
+
+<p>
+  <a href="{% url 'care:add_note' su.pk %}">Add Note</a>
+  <a class="btn btn-outline-primary ms-2" href="{% url 'care:documents_list' su.pk %}">Documents</a>
+</p>
+
+<h2>Communication Notes</h2>
+
+<form method="get" action="{% url 'care:export_notes_pdf' su.pk %}">
+  <label>Start date: <input type="date" name="start"></label>
+  <label style="margin-left:12px;">End date: <input type="date" name="end"></label>
+  <button type="submit" style="margin-left:12px;">Export PDF</button>
+</form>
+
+<hr>
+
+{% for n in notes %}
+  <div style="margin-bottom:14px;">
+    <div><strong>{{ n.created_at }}</strong> — {{ n.created_by.username }} — {{ n.visit_type|default:"" }}</div>
+    <div style="white-space: pre-wrap;">{{ n.note_text }}</div>
+    <div>Concern: {% if n.concern_flag %}YES{% else %}NO{% endif %}</div>
+  </div>
+  <hr>
+{% empty %}
+  <p>No notes yet.</p>
+{% endfor %}
+
+{% endblock %}

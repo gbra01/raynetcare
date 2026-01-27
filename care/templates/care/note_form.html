@@ -1,0 +1,42 @@
+{% extends "care/base.html" %}
+{% load static %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Add Note – {{ su.full_name }}</h3>
+  <a class="btn btn-outline-secondary" href="{% url 'care:serviceuser_detail' su.pk %}">Back</a>
+</div>
+
+<div class="card p-3">
+  <form id="note-form" method="post" data-redirect="{% url 'care:serviceuser_detail' su.pk %}">
+    {% csrf_token %}
+    <input type="hidden" name="service_user_id" value="{{ su.id }}">
+    <input type="hidden" name="client_uid" value="">
+    {{ form.as_p }}
+
+    <button class="btn btn-primary">Save</button>
+    <a class="btn btn-outline-secondary" href="{% url 'care:serviceuser_detail' su.pk %}">Cancel</a>
+  </form>
+</div>
+
+<script src="{% static 'care/offline.js' %}"></script>
+<script>
+  document.getElementById("note-form").addEventListener("submit", function(e) {
+    if (navigator.onLine) return; // normal Django submit
+
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+
+    addToOutbox({
+      client_uid: uid(),
+      service_user_id: data.get("service_user_id"),
+      visit_type: data.get("visit_type"),
+      note_text: data.get("note_text"),
+      concern_flag: data.get("concern_flag") === "on"
+    });
+
+    alert("⚠️ Offline: Note saved locally. Sync when online.");
+    window.location.href = form.getAttribute("data-redirect");
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "care/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">My Service Users</h3>
+  <form class="d-flex gap-2" method="get">
+    <input class="form-control" name="q" placeholder="Search name..." value="{{ q|default:'' }}">
+    <button class="btn btn-outline-primary">Search</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-striped mb-0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>DOB</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for su in service_users %}
+          <tr>
+            <td>{{ su.full_name }}</td>
+            <td>{{ su.date_of_birth|default:"—" }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-primary" href="{% url 'care:serviceuser_detail' su.pk %}">Open</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3">No assigned service users yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
